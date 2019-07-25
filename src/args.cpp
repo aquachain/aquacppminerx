@@ -21,15 +21,16 @@ std::pair<bool, uint32_t> parseRefreshRate(const std::string& refreshRateStr) {
 	int count = sscanf(refreshRateStr.c_str(), "%f%s", &refreshRate, unit);
 #endif
 	if (count != 2 || (unit[0] != 'm' && unit[0] != 's')) {
+		printf("error parsing refreshRate (-r flag)\ntry: -r 3s\n");
 		return { false, 0 };
-	}
-	if (unit[0] == 's') {
+	} else if (unit[0] == 's') {
 		return { true, uint32_t(1000.f * refreshRate) };
-	}
-	else if (unit[0] == 'm') {
+	} else if (unit[0] == 'm' && unit[1] == 's') {
+		return { true, uint32_t(refreshRate) };
+	} else if (unit[0] == 'm') {
 		return { true, uint32_t(1000.f * 60.f * refreshRate) };
 	}
-	assert(0);
+	printf("error parsing refreshRate (-r flag)\ntry: -r 3s\n");
 	return{ false, 0 };
 }
 
