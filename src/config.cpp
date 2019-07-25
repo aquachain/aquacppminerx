@@ -14,8 +14,18 @@
 #include <cstring>
 
 extern std::string s_configDir;
-
 const std::string CONFIG_FILE_NAME = "config.cfg";
+
+// config file fields
+enum {
+	MODE = 0,
+	GET_WORK_URL,
+	NTHREADS,
+	REFRESH_RATE_MS,
+	FULLNODE_URL,
+	N_PARAMS
+};
+
 
 std::string readInput() {
 	std::string res;
@@ -28,15 +38,6 @@ std::string configFilePath()
 {
 	return s_configDir + CONFIG_FILE_NAME;
 }
-
-enum {
-	MODE = 0,
-	GET_WORK_URL,
-	NTHREADS,
-	REFRESH_RATE_MS,
-	FULLNODE_URL,
-	N_PARAMS
-};
 
 bool configFileExists() {
 	std::ifstream fs(configFilePath());
