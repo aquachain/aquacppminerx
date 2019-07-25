@@ -7,59 +7,33 @@ ifndef verbose
   SILENT = @
 endif
 
-ifeq ($(config),debug_x64)
-  aquacppminer_config = debug_x64
-endif
-ifeq ($(config),debug_win32)
-  aquacppminer_config = debug_win32
-endif
-ifeq ($(config),debug_linux32)
-  aquacppminer_config = debug_linux32
-endif
-ifeq ($(config),rel_x64)
-  aquacppminer_config = rel_x64
-endif
-ifeq ($(config),rel_win32)
-  aquacppminer_config = rel_win32
-endif
-ifeq ($(config),rel_linux32)
-  aquacppminer_config = rel_linux32
-endif
-ifeq ($(config),relavx_x64)
-  aquacppminer_config = relavx_x64
-endif
-ifeq ($(config),relavx_win32)
-  aquacppminer_config = relavx_win32
-endif
-ifeq ($(config),relavx_linux32)
-  aquacppminer_config = relavx_linux32
-endif
-ifeq ($(config),relavx2_x64)
-  aquacppminer_config = relavx2_x64
-endif
-ifeq ($(config),relavx2_win32)
-  aquacppminer_config = relavx2_win32
-endif
-ifeq ($(config),relavx2_linux32)
-  aquacppminer_config = relavx2_linux32
-endif
-
-.PHONY: all clean help
-
-
-#aquacppminer:
-#ifneq (,$(aquacppminer_config))
-#	@echo "==== Building aquacppminer ($(aquacppminer_config)) ===="
-#	@${MAKE} --no-print-directory config=$(aquacppminer_config)
-#
-#endif
+.PHONY: all clean help debug cleanall
 
 TARGETDIR ?= bin
 
-aquacppminer: $(TARGETDIR)/aquacppminer # normal
-aquacppminer_d: $(TARGETDIR)/aquacppminer_d # slow, debug
-aquacppminer_avx: $(TARGETDIR)/aquacppminer_avx # avx support
-aquacppminer_avx2: $(TARGETDIR)/aquacppminer_avx2 # avx2 support!
+all: aquacppminer aquacppminer_avx aquacppminer_avx2
+debug: aquacppminer_d
+cleanall:
+	$(MAKE) config=rel_x64 clean
+	$(MAKE) config=debug_x64 clean
+	$(MAKE) config=relavx_x64 clean
+	$(MAKE) config=relavx2_x64 clean
+
+#aquacppminer: $(TARGETDIR)/aquacppminer # normal
+#aquacppminer_d: $(TARGETDIR)/aquacppminer_d # slow, debug
+#aquacppminer_avx: $(TARGETDIR)/aquacppminer_avx # avx support
+#aquacppminer_avx2: $(TARGETDIR)/aquacppminer_avx2 # avx2 support!
+
+
+aquacppminer:
+	$(MAKE) config=rel_x64 bin/aquacppminer
+aquacppminer_d:
+	$(MAKE) config=debug_x64 bin/aquacppminer_d
+aquacppminer_avx:
+	$(MAKE) config=relavx_x64 bin/aquacppminer_avx
+aquacppminer_avx2:
+	$(MAKE) config=relavx2_x64 bin/aquacppminer_avx2
+
 
 help:
 	@echo "Usage: make [config=name] [target]"
@@ -424,9 +398,10 @@ OBJECTS := \
 	$(OBJDIR)/miner.o \
 	$(OBJDIR)/miningConfig.o \
 	$(OBJDIR)/string_utils.o \
-	$(OBJDIR)/tests.o \
-	$(OBJDIR)/timer.o \
 	$(OBJDIR)/updateThread.o \
+	$(OBJDIR)/timer.o \
+
+TESTFILES := $(OBJDIR)/tests.o
 
 RESOURCES := \
 
@@ -440,7 +415,9 @@ ifeq (/bin,$(findstring /bin,$(SHELL)))
   SHELLTYPE := posix
 endif
 
-$(TARGET): $(GCH) ${CUSTOMFILES} $(OBJECTS) $(LDDEPS) $(RESOURCES)
+# target
+# $(TARGET): $(GCH) ${CUSTOMFILES} $(OBJECTS) $(LDDEPS) $(RESOURCES)
+$(TARGET): $(OBJECTS)
 	@echo Linking $(TARGET)
 ifeq (posix,$(SHELLTYPE))
 	$(SILENT) mkdir -p $(TARGETDIR)
@@ -662,3 +639,7 @@ endif
 ifneq (,$(PCH))
   -include $(OBJDIR)/$(notdir $(PCH)).d
 endif
+
+
+test: $(OBJECTS)
+	$(CXX) $(ALL_CXXFLAGS) -o "$@" src/tests.cpp $(ALL_LDFLAGS) $(LIBS)
