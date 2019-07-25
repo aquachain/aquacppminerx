@@ -1,5 +1,10 @@
 #include "miner.h"
+
+#define ARGON_VALIDITY_CHECK (0)
+#if ARGON_VALIDITY_CHECK
 #include "tests.h"
+#endif
+
 #include "miningConfig.h"
 #include "updateThread.h"
 #include "args.h"
@@ -49,7 +54,6 @@ const std::string ARGON_ARCH = "AVX";
 const std::string ARGON_ARCH = "";
 #endif
 
-#define ARGON_VALIDITY_CHECK (1)
 
 using std::chrono::high_resolution_clock;
 
